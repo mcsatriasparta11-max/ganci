@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klaim Voucher</title>
+
+<style>
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#5f72bd,#9b23ea);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container {
+  background: rgba(255,255,255,0.95);
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  width:320px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+.logo {
+  width:70px;
+  margin-bottom:10px;
+}
+
+.brand {
+  font-weight:bold;
+}
+
+.sub {
+  font-size:13px;
+  color:#666;
+  margin-bottom:15px;
+}
+
+input {
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-bottom:10px;
+}
+
+.counter {
+  margin-bottom:15px;
+}
+
+button {
+  padding:14px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:disabled {
+  background:gray;
+}
+
+.result {
+  margin-top:20px;
+}
+
+.voucher {
+  margin-top:15px;
+  padding:15px;
+  border-radius:12px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+}
+
+.code {
+  margin-top:10px;
+  background: rgba(255,255,255,0.2);
+  padding:6px;
+  border-radius:6px;
+  letter-spacing:2px;
+}
+
+.note {
+  margin-top:10px;
+  font-size:12px;
+  background: rgba(255,255,255,0.2);
+  padding:6px;
+  border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <img src="LOGO.png" class="logo">
+
+  <div class="brand">Nama Brand</div>
+  <div class="sub">Voucher spesial untuk kamu 🎁</div>
+
+  <input type="text" id="nama" placeholder="Masukkan nama kamu">
+
+  <div class="counter">Sisa voucher: <b id="sisa">10</b></div>
+
+  <button id="btn" onclick="klaim()">Ambil Sekarang</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+const vouchers = ["DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K","DISKON 10K"];
+
+function generateCode() {
+  let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "VCR-";
+  for(let i=0;i<6;i++){
+    code += chars.charAt(Math.floor(Math.random()*chars.length));
+  }
+  return code;
+}
+
+// load awal
+window.onload = function() {
+  let nama = localStorage.getItem("nama");
+  let voucher = localStorage.getItem("klaim");
+  let kode = localStorage.getItem("kode");
+  let lastClaim = localStorage.getItem("lastClaim");
+  let today = new Date().toDateString();
+  let sisa = localStorage.getItem("sisa") || 10;
+
+  document.getElementById("sisa").innerText = sisa;
+
+  if (nama) {
+    document.getElementById("nama").value = nama;
+  }
+
+  if (voucher && lastClaim === today) {
+    document.getElementById("btn").disabled = true;
+    tampilVoucher(nama, voucher, kode);
+  }
+
+  if (sisa <= 0) {
+    document.getElementById("btn").disabled = true;
+  }
+};
+
+function klaim() {
+  let today = new Date().toDateString();
+  let lastClaim = localStorage.getItem("lastClaim");
+
+  if (lastClaim === today) {
+    alert("Kamu sudah klaim hari ini!");
+    return;
+  }
+
+  let nama = document.getElementById("nama").value.trim();
+  if (!nama) {
+    alert("Masukkan nama dulu!");
+    return;
+  }
+
+  let sisa = localStorage.getItem("sisa") || 10;
+
+  if (sisa <= 0) {
+    document.getElementById("result").innerHTML = "❌ Voucher habis";
+    return;
+  }
+
+  let random = vouchers[Math.floor(Math.random() * vouchers.length)];
+  let kode = generateCode();
+
+  localStorage.setItem("nama", nama);
+  localStorage.setItem("klaim", random);
+  localStorage.setItem("kode", kode);
+  localStorage.setItem("lastClaim", today);
+
+  sisa--;
+  localStorage.setItem("sisa", sisa);
+
+  document.getElementById("sisa").innerText = sisa;
+
+  tampilVoucher(nama, random, kode);
+
+  document.getElementById("btn").disabled = true;
+}
+
+function tampilVoucher(nama, voucher, kode) {
+  document.getElementById("result").innerHTML =
+    `<div class="voucher">
+      🎉 Selamat, <b>${nama}</b>!<br>
+      Kamu mendapatkan:<br>
+      <b>${voucher}</b>
+      <div class="code">${kode}</div>
+      <div class="note">📌 Tunjukan voucher ini ke penjual</div>
+    </div>`;
+}
+</script>
+
+</body>
+</html>
